@@ -45,7 +45,7 @@ resource "aws_security_group" "allow_http" {
 # Resource configuration
 resource "aws_instance" "master-instance" {
       ami = "ami-c55673a0"
-      instance_type = "t2.micro"
+      instance_type = "${lookup(var.instance_type, var.environment)}"
       subnet_id = "${var.subnet_id}"
       vpc_security_group_ids = ["${aws_security_group.allow_ssh.id}"]
       tags {
@@ -54,7 +54,7 @@ resource "aws_instance" "master-instance" {
     }
     resource "aws_instance" "slave-instance" {
       ami = "ami-c55673a0"
-      instance_type = "t2.micro"
+      instance_type = "${lookup(var.instance_type, var.environment)}"
       subnet_id = "${var.subnet_id}"
       depends_on = ["aws_instance.master-instance"]
       vpc_security_group_ids = ["${aws_security_group.allow_ssh.id}"]

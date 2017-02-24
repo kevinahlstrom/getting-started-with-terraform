@@ -1,6 +1,6 @@
 # Provider configuration
 provider "aws" {
-  region = "us-east-2"
+  region = "${var.region}"
 }
 
 # Network configuration
@@ -18,6 +18,7 @@ module "IfYouStrayDownThatWay" {
   vpc_id = "${aws_vpc.my_vpc.id}"
   subnet_id = "${aws_subnet.public.id}"
   name = "Stray"
+  environment = "${var.environment}"
 }
 
 module "BalmyBreezes" {
@@ -25,4 +26,5 @@ module "BalmyBreezes" {
   vpc_id = "${aws_vpc.my_vpc.id}"
   subnet_id = "${aws_subnet.public.id}"
   name = "Balmy_Breezes ${module.IfYouStrayDownThatWay.hostname}"
+  environment = "${var.environment}"
 }
