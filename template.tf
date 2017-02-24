@@ -13,37 +13,16 @@ resource "aws_subnet" "public" {
     cidr_block = "10.0.1.0/24"
 }
 
-resource "aws_security_group" "allow_ssh" {
-  name = "allow_ssh"
-  description = "Allow ssh traffic"
+module "IfYouStrayDownThatWay" {
+  source = "./modules/application"
   vpc_id = "${aws_vpc.my_vpc.id}"
-
-  ingress {
-    from_port = 22
-    to_port = 22
-    protocol = "tcp"
-    cidr_blocks = ["96.8.80.0/20"]
-  }
-
-  egress {
-    from_port = 0
-    to_port = 0
-    protocol = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
+  subnet_id = "${aws_subnet.public.id}"
+  name = "Stray"
 }
 
-# Resource configuration
-resource "aws_instance" "master-instance" {
-      ami = "ami-c55673a0"
-      instance_type = "t2.micro"
-      subnet_id = "${aws_subnet.public.id}"
-      vpc_security_group_ids = ["${aws_security_group.allow_ssh.id}"]
-    }
-    resource "aws_instance" "slave-instance" {
-      ami = "ami-c55673a0"
-      instance_type = "t2.micro"
-      subnet_id = "${aws_subnet.public.id}"
-      depends_on = ["aws_instance.master-instance"]
-      vpc_security_group_ids = ["${aws_security_group.allow_ssh.id}"]
-    }
+module "BalmyBreezes" {
+  source = "./modules/application"
+  vpc_id = "${aws_vpc.my_vpc.id}"
+  subnet_id = "${aws_subnet.public.id}"
+  name = "Balmy_Breezes ${module.IfYouStrayDownThatWay.hostname}"
+}
