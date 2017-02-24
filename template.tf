@@ -22,7 +22,7 @@ resource "aws_security_group" "default" {
     from_port = 22
     to_port = 22
     protocol = "tcp"
-    cidr_blocks = ["96.8.80.0/20"] 
+    cidr_blocks = ["96.8.80.0/20"]
   }
 }
 
