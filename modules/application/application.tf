@@ -22,9 +22,17 @@ resource "aws_security_group" "allow_http" {
   }
 }
 
+
+
+# pull most recently created AMI from the AWS account used for Terraform runs
+data "aws_ami" "app-ami" {
+  most_recent = true
+  owners = ["self"]
+}
+
 # Resource configuration
 resource "aws_instance" "master-instance" {
-      ami = "ami-c55673a0"
+      ami = "${data.aws_ami.app-ami.id}"
       instance_type = "${lookup(var.instance_type, var.environment)}"
       subnet_id = "${var.subnet_id}"
 
@@ -37,7 +45,7 @@ resource "aws_instance" "master-instance" {
       }
     }
     resource "aws_instance" "slave-instance" {
-      ami = "ami-c55673a0"
+      ami = "${data.aws_ami.app-ami.id}"
       instance_type = "${lookup(var.instance_type, var.environment)}"
       subnet_id = "${var.subnet_id}"
       depends_on = ["aws_instance.master-instance"]

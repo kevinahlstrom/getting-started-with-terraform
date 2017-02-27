@@ -4,8 +4,21 @@ provider "aws" {
 }
 
 # Network configuration
+#resource "aws_vpc" "my_vpc" {
+#  cidr_block = "10.0.0.0/16"
+#}
+data "aws_vpc" "management_layer" {
+  id = "vpc-2efe5547"
+}
+
 resource "aws_vpc" "my_vpc" {
-  cidr_block = "10.0.0.0/16"
+  cidr_block = "${var.vpc_cidr}"
+}
+
+resource "aws_vpc_peering_connection" "my_vpc-management" {
+  peer_vpc_id = "${data.aws_vpc.management_layer.id}"
+  vpc_id = "${aws_vpc.my_vpc.id}"
+  auto_accept = true
 }
 
 resource "aws_subnet" "public" {
