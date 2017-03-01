@@ -35,6 +35,12 @@ resource "random_shuffle" "hostname_creature" {
   result_count = 1
 }
 
+# generate both private and public key that could be used to get the initial SSH connection to the server
+resource "tls_private_key" "example" {
+    algorithm = "ECDSA"
+    ecdsa_curve = "P384"
+}
+
 # generate random hostname
 resource "random_id" "hostname" {
   # if a new AMI is there, then the instance will be recreated and new hostname is required
