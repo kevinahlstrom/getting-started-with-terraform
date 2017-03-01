@@ -39,6 +39,12 @@ resource "aws_security_group" "default" {
   }
 }
 
+# import key pair
+resource "aws_key_pair" "terraform" {
+  key_name = "terraform"
+  public_key = "${file("C:/Users/kahlstro/.ssh/id_rsa.pub")}"
+}
+
 module "IfYouStrayDownThatWay" {
   source = "./modules/application"
   vpc_id = "${aws_vpc.my_vpc.id}"
@@ -46,6 +52,8 @@ module "IfYouStrayDownThatWay" {
   name = "Stray"
   environment = "${var.environment}"
   extra_sgs = ["${aws_security_group.default.id}"]
+  extra_packages = "${lookup(var.extra_packages, "my_app", "base")}"
+  external_nameserver = "${(var.external_nameserver)}"
 }
 
 module "BalmyBreezes" {
@@ -55,4 +63,6 @@ module "BalmyBreezes" {
   name = "Balmy_Breezes ${module.IfYouStrayDownThatWay.hostname}"
   environment = "${var.environment}"
   extra_sgs = ["${aws_security_group.default.id}"]
+  extra_packages = "${lookup(var.extra_packages, "my_app", "base")}"
+  external_nameserver = "${(var.external_nameserver)}"
 }

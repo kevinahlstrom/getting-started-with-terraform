@@ -10,4 +10,7 @@ variable "instance_type" {
   }
 }
 
+#pass variables to the application module
 variable "extra_sgs" { default = [] }
+variable "extra_packages" {}
+variable "external_nameserver" {} 

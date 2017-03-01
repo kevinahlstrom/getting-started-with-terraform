@@ -22,12 +22,20 @@ resource "aws_security_group" "allow_http" {
   }
 }
 
-
-
-# pull most recently created AMI from the AWS account used for Terraform runs
+#pull most recently created AMI from the AWS account used for Terraform runs
 data "aws_ami" "app-ami" {
   most_recent = true
   owners = ["self"]
+}
+
+# template data file resource
+data "template_file" "user_data" {
+  template = "${file("${path.module}/user_data.sh.tpl")}"
+
+  vars {
+    packages = "${var.extra_packages}"
+    nameserver = "${var.external_nameserver}"
+  }
 }
 
 # Resource configuration
@@ -40,6 +48,14 @@ resource "aws_instance" "master-instance" {
       # / remove any duplicates with distinct
       vpc_security_group_ids = ["${distinct(concat(var.extra_sgs, aws_security_group.allow_http.*.id))}"]
 
+      #render this template file as a user data for the instance
+      user_data = "${data.template_file.user_data.rendered}"
+
+      #tell the instance to ignore changes of user_data to avoid instance re-creation every time file is touched
+      lifecycle {
+        ignore_changes = ["user_data"]
+      }
+      
       tags {
         Name = "${var.name}"
       }
@@ -53,6 +69,14 @@ resource "aws_instance" "master-instance" {
       # join the extra_sgs list in template.tf with the list made from this app-specific SG defined in application.tf
       # / remove any duplicates with distinct
       vpc_security_group_ids = ["${distinct(concat(var.extra_sgs, aws_security_group.allow_http.*.id))}"]
+
+      #render this template file as a user data for the instance
+      user_data = "${data.template_file.user_data.rendered}"
+
+      #tell the instance to ignore changes of user_data to avoid instance re-creation every time file is touched
+      lifecycle {
+        ignore_changes = ["user_data"]
+      }
 
       tags {
         Name = "${var.name}"
