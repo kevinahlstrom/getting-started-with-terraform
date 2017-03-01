@@ -28,7 +28,12 @@ data "aws_ami" "app-ami" {
   owners = ["self"]
 }
 
-
+# will return a randomly ordered list of items from the original list you provide.
+# Can be used with the hostname generator below
+resource "random_shuffle" "hostname_creature" {
+  input = ["griffin", "gargoyle", "dragon"]
+  result_count = 1
+}
 
 # generate random hostname
 resource "random_id" "hostname" {
@@ -45,7 +50,7 @@ data "template_file" "user_data" {
   vars {
     packages = "${var.extra_packages}"
     nameserver = "${var.external_nameserver}"
-    hostname = "${random_id.hostname.b64}"
+    hostname = "${random_shuffle.hostname_creature.result[0]}${random_id.hostname.b64}"
   }
 }
 
