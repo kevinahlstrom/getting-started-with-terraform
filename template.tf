@@ -11,11 +11,6 @@ data "aws_vpc" "management_layer" {
   id = "vpc-2efe5547"
 }
 
-# external data example for Terraform templates
-data "external" "example" {
-  program = ["ruby", "${path.module}/convert_to_JSON.rb"]
-}
-
 resource "aws_vpc" "my_vpc" {
   cidr_block = "${var.vpc_cidr}"
 }
@@ -54,8 +49,7 @@ module "IfYouStrayDownThatWay" {
   source = "./modules/application"
   vpc_id = "${aws_vpc.my_vpc.id}"
   subnet_id = "${aws_subnet.public.id}"
-  #name = "Stray"
-  name = "Stray-${data.external.example.result.owner}"
+  name = "Stray"
   environment = "${var.environment}"
   extra_sgs = ["${aws_security_group.default.id}"]
   extra_packages = "${lookup(var.extra_packages, "my_app", "base")}"
@@ -66,8 +60,7 @@ module "BalmyBreezes" {
   source = "./modules/application"
   vpc_id = "${aws_vpc.my_vpc.id}"
   subnet_id = "${aws_subnet.public.id}"
-  #name = "Balmy_Breezes ${module.IfYouStrayDownThatWay.hostname}"
-  name = "Balmy_Breezes-${data.external.example.result.owner}"
+  name = "Balmy_Breezes ${module.IfYouStrayDownThatWay.hostname}"
   environment = "${var.environment}"
   extra_sgs = ["${aws_security_group.default.id}"]
   extra_packages = "${lookup(var.extra_packages, "my_app", "base")}"

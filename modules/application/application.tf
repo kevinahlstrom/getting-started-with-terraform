@@ -28,6 +28,16 @@ data "aws_ami" "app-ami" {
   owners = ["self"]
 }
 
+
+
+# generate random hostname
+resource "random_id" "hostname" {
+  # if a new AMI is there, then the instance will be recreated and new hostname is required
+  keepers {
+    ami_id = "${data.aws_ami.app-ami.id}"
+  }
+  byte_length = 4
+}
 # template data file resource
 data "template_file" "user_data" {
   template = "${file("${path.module}/user_data.sh.tpl")}"
@@ -35,6 +45,7 @@ data "template_file" "user_data" {
   vars {
     packages = "${var.extra_packages}"
     nameserver = "${var.external_nameserver}"
+    hostname = "${random_id.hostname.b64}"
   }
 }
 
@@ -55,7 +66,7 @@ resource "aws_instance" "master-instance" {
       lifecycle {
         ignore_changes = ["user_data"]
       }
-      
+
       tags {
         Name = "${var.name}"
       }
