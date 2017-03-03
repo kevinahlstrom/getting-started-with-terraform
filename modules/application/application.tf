@@ -60,9 +60,21 @@ data "template_file" "user_data" {
   }
 }
 
+# Small example of using consul_keys to set the AMI instead of using data source for AMI
+provider "consul" {
+    address = "consul.example.com:80"
+    datacenter = "frankfurt"
+}
+data "consul_keys" "amis" {
+    # Read the launch AMI from Consul
+    key {
+        name = "whatever_app"
+        path = "ami"
+    }
+}
 # Resource configuration
 resource "aws_instance" "master-instance" {
-      ami = "${data.aws_ami.app-ami.id}"
+      ami = "${consul_keys.amis.var.whatever_app}"
       instance_type = "${lookup(var.instance_type, var.environment)}"
       subnet_id = "${var.subnet_id}"
 
@@ -83,7 +95,7 @@ resource "aws_instance" "master-instance" {
       }
     }
     resource "aws_instance" "slave-instance" {
-      ami = "${data.aws_ami.app-ami.id}"
+      ami = "${consul_keys.amis.var.whatever_app}"
       instance_type = "${lookup(var.instance_type, var.environment)}"
       subnet_id = "${var.subnet_id}"
       depends_on = ["aws_instance.master-instance"]
